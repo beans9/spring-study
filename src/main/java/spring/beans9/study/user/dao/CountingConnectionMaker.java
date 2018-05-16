@@ -6,18 +6,24 @@ import java.sql.SQLException;
 
 public class CountingConnectionMaker implements ConnectionMaker {
 	int count = 0;
-	private ConnectionMaker realConnectionMaker;
+	private ConnectionMaker connectionMaker;
+	
+	public void setConnectionMaker(ConnectionMaker connectionMaker) {
+		this.connectionMaker = connectionMaker;
+	}
+
 	public CountingConnectionMaker(ConnectionMaker realConnectionMaker) {
-		this.realConnectionMaker = realConnectionMaker;
+		this.connectionMaker = realConnectionMaker;
 	}
 	
 	public Connection makeConnection() throws SQLException {
 		this.count++;
-		return realConnectionMaker.makeConnection();
+		return connectionMaker.makeConnection();
 	}
 	
 	public int getCount() {
 		return this.count;
 	}
-
+	
+	CountingConnectionMaker(){super();}
 }

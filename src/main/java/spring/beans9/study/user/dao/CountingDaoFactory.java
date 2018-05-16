@@ -1,4 +1,4 @@
-package spring.beans9.study.user.dao;
+/*package spring.beans9.study.user.dao;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,3 +20,4 @@ public class CountingDaoFactory {
 		return new DConnectionMaker();
 	}
 }
+*/

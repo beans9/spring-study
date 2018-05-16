@@ -7,7 +7,7 @@ import java.sql.SQLException;
 public class DConnectionMaker implements ConnectionMaker {
 
 	public Connection makeConnection() throws SQLException {
-		Connection c = DriverManager.getConnection("jdbc:mysql://localhost/spring?puseSSL=false", "spring", "book");
+		Connection c = DriverManager.getConnection("c", "spring", "book");
 		return c;
 	}
 
