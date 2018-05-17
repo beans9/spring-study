@@ -15,10 +15,15 @@
 		<property name="password" value="book" />
 	</bean>
 	
+	<!-- <bean id="jdbcContext" class="spring.beans9.study.user.dao.JdbcContext">
+		<property name="dataSource" ref="dataSource" />
+	</bean> -->
+	
+	
 	<bean id="userDao" class="spring.beans9.study.user.dao.UserDao">
 		<property name="dataSource" ref="dataSource" />
+		<!-- <property name="jdbcContext" ref="jdbcContext" /> -->	
 	</bean>
-	
 	
 	<!-- 
 	<bean id="userDao" class="springbook.user.dao.UserDao">

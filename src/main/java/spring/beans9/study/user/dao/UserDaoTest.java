@@ -4,6 +4,8 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -11,6 +13,7 @@ import org.junit.runner.JUnitCore;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -40,6 +43,7 @@ public class UserDaoTest {
 		this.user4 = new User("a4","test4","test4");
 		
 	}
+	
 	@Test
 	public void addAndGet() throws ClassNotFoundException, SQLException {
 		//ApplicationContext context = new AnnotationConfigApplicationContext(DaoFactory.class);
@@ -60,7 +64,7 @@ public class UserDaoTest {
 		assertThat(user2.getPassword(), equalTo(dbuser2.getPassword()));
 	}
 	
-	@Test(expected=NullPointerException.class)
+	@Test(expected=EmptyResultDataAccessException.class)
 	public void getUserFailure() throws SQLException, ClassNotFoundException {
 		userDao.deleteAll();
 		assertThat(userDao.getCount(), equalTo(0));
@@ -85,6 +89,43 @@ public class UserDaoTest {
 		
 		userDao.add(user4);
 		assertThat(userDao.getCount(), equalTo(4));
+	}
+	
+	@Test
+	public void getAll() throws SQLException {
+		userDao.deleteAll();
+		
+		userDao.add(user1);
+		List<User> users1 = userDao.getAll();
+		assertThat(users1.size(), equalTo(1));
+		checkSameUser(user1, users1.get(0));
+		
+		userDao.add(user2);
+		List<User> users2 = userDao.getAll();
+		assertThat(users2.size(), equalTo(2));
+		checkSameUser(user1, users2.get(0));
+		checkSameUser(user2, users2.get(1));
+		
+		userDao.add(user3);
+		List<User> users3 = userDao.getAll();
+		assertThat(users3.size(), equalTo(3));
+		checkSameUser(user1, users3.get(0));
+		checkSameUser(user2, users3.get(1));
+		checkSameUser(user3, users3.get(2));
+		
+		userDao.add(user4);
+		List<User> users4 = userDao.getAll();
+		assertThat(users4.size(), equalTo(4));
+		checkSameUser(user1, users4.get(0));
+		checkSameUser(user2, users4.get(1));
+		checkSameUser(user3, users4.get(2));
+		checkSameUser(user4, users4.get(3));
+	}
+	
+	private void checkSameUser(User user1, User user2) {
+		assertThat(user1.getName(), equalTo(user2.getName()));
+		assertThat(user1.getPassword(), equalTo(user2.getPassword()));
+		assertThat(user1.getId(), equalTo(user2.getId()));
 	}
 	
 	public static void main(String[] args) {
