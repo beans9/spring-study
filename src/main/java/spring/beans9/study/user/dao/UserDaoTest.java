@@ -4,7 +4,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
@@ -13,6 +12,7 @@ import org.junit.runner.JUnitCore;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -25,7 +25,7 @@ public class UserDaoTest {
 	@Autowired
 	private ApplicationContext context;
 	
-	private UserDao userDao;
+	private UserDaoJdbc userDao;
 	private User user1;
 	private User user2;
 	private User user3;
@@ -35,13 +35,21 @@ public class UserDaoTest {
 	@Before
 	public void setUp() {
 		// ApplicationContext context = new GenericXmlApplicationContext("applicationContext.xml");
-		this.userDao = this.context.getBean("userDao", UserDao.class);
+		this.userDao = this.context.getBean("userDao", UserDaoJdbc.class);
 		
-		this.user1 = new User("a1","test1","test1");
-		this.user2 = new User("a2","test2","test2");
-		this.user3 = new User("a3","test3","test3");
-		this.user4 = new User("a4","test4","test4");
+		this.user1 = new User("a1","test1","test1", Level.BASIC, 1, 0);
+		this.user2 = new User("a2","test2","test2", Level.SILVER, 55, 10);
+		this.user3 = new User("a3","test3","test3", Level.GOLD, 100, 40);
+		this.user4 = new User("a4","test4","test4", Level.GOLD, 120, 50);
+	}
+	
+	@Test(expected=DataAccessException.class)
+	public void add() {
+		userDao.deleteAll();
+		assertThat(userDao.getCount(), equalTo(0));
 		
+		userDao.add(user1);
+		userDao.add(user1);
 	}
 	
 	@Test
@@ -68,13 +76,11 @@ public class UserDaoTest {
 	public void getUserFailure() throws SQLException, ClassNotFoundException {
 		userDao.deleteAll();
 		assertThat(userDao.getCount(), equalTo(0));
-		
 		userDao.get("unknow");
 	}
 	
 	@Test
 	public void count() throws SQLException, ClassNotFoundException {
-		
 		userDao.deleteAll();
 		assertThat(userDao.getCount(), equalTo(0));
 		
@@ -122,10 +128,34 @@ public class UserDaoTest {
 		checkSameUser(user4, users4.get(3));
 	}
 	
+	@Test
+	public void update() {
+		userDao.deleteAll();
+		
+		userDao.add(user1);
+		userDao.add(user2);
+		
+		user1.setName("테스트");
+		user1.setPassword("테스트");
+		user1.setLevel(Level.GOLD);
+		user1.setLogin(100);
+		user1.setRecommend(999);
+		
+		userDao.update(user1);
+		
+		User user1update = userDao.get(user1.getId());
+		checkSameUser(user1, user1update);
+		User user2same = userDao.get(user2.getId());
+		checkSameUser(user2, user2same);
+	}
+	
 	private void checkSameUser(User user1, User user2) {
 		assertThat(user1.getName(), equalTo(user2.getName()));
 		assertThat(user1.getPassword(), equalTo(user2.getPassword()));
 		assertThat(user1.getId(), equalTo(user2.getId()));
+		assertThat(user1.getLevel(), equalTo(user2.getLevel()));
+		assertThat(user1.getLogin(), equalTo(user2.getLogin()));
+		assertThat(user1.getRecommend(), equalTo(user2.getRecommend()));
 	}
 	
 	public static void main(String[] args) {
